@@ -21,5 +21,5 @@ app.use(async (ctx, next) =>{
         ctx.body = "wrong"
     }
 })
-app.listen(3001)
-console.log('listen: '+ 3001);
+app.listen(3000)
+console.log('listen: '+ 3000);
