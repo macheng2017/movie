@@ -34,22 +34,25 @@ module.exports = config => {
         console.log(data)
         // 2. 将data解析为json格式
         const content = await util.parseXML(data)
+        console.log('content')
+        console.log(content)
         const message = util.formatMessage(content.xml)
+        console.log('message')
+        console.log(message)
         // 3. 拼装成xml的数据片段
         // 4. 通过ctx返回数据
         ctx.status = 200
         ctx.type = 'application/xml'
-        ctx.body = `<xml> <ToUserName>< ![CDATA[${
+        ctx.body = `<xml> <ToUserName><![CDATA[${
           message.FromUserName
-        }] ]></ToUserName> <FromUserName>< ![CDATA[${
+        }]]></ToUserName> <FromUserName><![CDATA[${
           message.ToUserName
-        }] ]></FromUserName> <CreateTime>${parseInt(
+        }]]></FromUserName> <CreateTime>${parseInt(
           new Date().getTime() / 1000,
           0
-        ) +
-          ''}</CreateTime> <MsgType>< ![CDATA[text] ]></MsgType> <Content>< ![CDATA[${
-          message.content
-        }] ]></Content> </xml>`
+        )}</CreateTime> <MsgType><![CDATA[text]]></MsgType> <Content><![CDATA[${
+          message.Content
+        }]]></Content> </xml>`
       }
     }
   }
