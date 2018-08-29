@@ -1,4 +1,6 @@
 const sha1 = require('sha1')
+const getRawBody = require('raw-body')
+const util = require('./util')
 module.exports = config => {
   return async (ctx, next) => {
     const { signature, timestamp, nonce, echostr } = ctx.query
@@ -23,19 +25,31 @@ module.exports = config => {
         // 2. 将data解析为json格式
         // 3. 拼装成xml的数据片段
         // 4. 通过ctx返回数据
-
         const data = await getRawBody(ctx.req, {
           length: ctx.length,
           limit: '1mb', // 体积过大就丢掉
           encoding: ctx.charset
         })
+
+        console.log(data)
         // 2. 将data解析为json格式
-        const content = await util.parseXml(data)
+        const content = await util.parseXML(data)
         const message = util.formatMessage(content.xml)
         // 3. 拼装成xml的数据片段
         // 4. 通过ctx返回数据
-
-        ctx.body = 'wecome to la la la'
+        ctx.status = 200
+        ctx.type = 'application/xml'
+        ctx.body = `<xml> <ToUserName>< ![CDATA[${
+          message.FromUserName
+        }] ]></ToUserName> <FromUserName>< ![CDATA[${
+          message.ToUserName
+        }] ]></FromUserName> <CreateTime>${parseInt(
+          new Date().getTime() / 1000,
+          0
+        ) +
+          ''}</CreateTime> <MsgType>< ![CDATA[text] ]></MsgType> <Content>< ![CDATA[${
+          message.content
+        }] ]></Content> </xml>`
       }
     }
   }
