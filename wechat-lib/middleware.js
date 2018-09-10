@@ -1,7 +1,7 @@
 const sha1 = require('sha1')
 const getRawBody = require('raw-body')
 const util = require('./util')
-module.exports = config => {
+module.exports = (config, replay) => {
   return async (ctx, next) => {
     const { signature, timestamp, nonce, echostr } = ctx.query
     const token = config.wechat.token
@@ -37,22 +37,22 @@ module.exports = config => {
         console.log('content')
         console.log(content)
         const message = util.formatMessage(content.xml)
+        // 为了能在reply中能拿到message，将其挂在ctx上面
+        ctx.weixin = message
+        // 上面添加一个replay，在这里就可以拿到，在还没有交给ctx之前调用
+        await replay.apply(ctx, [ctx, next])
+
+        const msg = ctx.weixin
+        const replyBody = ctx.body
+        const xml = util.tpl(replyBody,msg)
+
         console.log('message')
         console.log(message)
         // 3. 拼装成xml的数据片段
         // 4. 通过ctx返回数据
         ctx.status = 200
         ctx.type = 'application/xml'
-        ctx.body = `<xml> <ToUserName><![CDATA[${
-          message.FromUserName
-        }]]></ToUserName> <FromUserName><![CDATA[${
-          message.ToUserName
-        }]]></FromUserName> <CreateTime>${parseInt(
-          new Date().getTime() / 1000,
-          0
-        )}</CreateTime> <MsgType><![CDATA[text]]></MsgType> <Content><![CDATA[${
-          message.Content
-        }]]></Content> </xml>`
+       
       }
     }
   }

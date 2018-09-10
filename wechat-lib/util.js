@@ -1,4 +1,5 @@
 const xml2js = require('xml2js')
+const template = require('./tpl')
 
 exports.parseXML = xml => {
   return new Promise((resolve, reject) => {
@@ -40,6 +41,31 @@ const formatMessage = result => {
     }
   }
   return message
+}
+
+const tep = (content, msg) =>{
+  // 先写一个默认值,防止出错
+  let type = 'text'
+  // content是数组的话可能是图文消息
+  if (Array.isArray(content)) {
+    type ='news'
+  }
+  if (!content) content ='Empty News'
+           
+  if(content && content.type) {
+    type = content.type
+  }
+  // 在拼装之前把数据整理
+
+  let info = Object.assign({},{
+    content: content,
+    msgType: type,
+    createTime: new Date().getTime(),
+    toUserName: msg.FromUserName,
+    formUserName: msg.ToUserName
+  })
+//  这个template就是把这数据替换成占位符的模板
+return template(info)
 }
 
 exports.formatMessage = formatMessage
